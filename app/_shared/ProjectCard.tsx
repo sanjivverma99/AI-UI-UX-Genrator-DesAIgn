@@ -13,20 +13,27 @@ function ProjectCard({ project }: Props) {
       className="rounded-2xl p-4 border hover:shadow-lg transition-shadow duration-300"
     >
       <div className="rounded-2xl  ">
-        <Image
-          src={project.screenshot as string}
-          alt={project.projectName as string}
-          width={400}
-          height={300}
-          className="rounded-xl h-[150px] w-full object-cover"
-        />
-        {/* <Image src={project.screenshot as string} alt={project.projectName as string} width={400} height={300} className='rounded-xl h-[300px] w-full bg-black'/> */}
+       {project?.screenshot ? (
+  <Image
+    src={project.screenshot}
+    alt={project?.projectName || "Project"}
+    width={400}
+    height={300}
+    className="rounded-xl h-[150px] w-full object-cover"
+  />
+) : (
+  <div className="rounded-xl h-[150px] w-full bg-gray-200 flex items-center justify-center">
+    No Image
+  </div>
+)}
+        {/* <Image src={project.screenshot as string} alt={project.projectName as string} 
+        width={400} height={300} className='rounded-xl h-[300px] w-full bg-black'/> */}
         <h3 className="font-semibold text-lg mt-2">
-          {project.projectName || "Untitled Project"}
+          {project?.projectName || "Untitled Project"}
         </h3>
         <p className="text-sm text-gray-500">
-          {project.createdAt
-            ? new Date(project.createdAt).toLocaleDateString()
+          {project?.createdAt
+            ? new Date(project?.createdAt).toLocaleDateString()
             : "Recent Project"}
         </p>
       </div>

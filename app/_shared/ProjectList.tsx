@@ -13,17 +13,25 @@ function ProjectList() {
   }, []);
 
   const GetProjectList = async () => {
-    setLoading(true);
-    const result = await axios.get("/api/project");
-    console.log("API Response:", result.data);
+    try {
+      setLoading(true);
 
+      const result = await axios.get("/api/project");
 
-    if ((result.data)) {
-      setProjectList(result.data.slice(0, 6));
-    } else {
-      setProjectList([]);
+console.log("API Response:", result.data);
+console.log("Is Array:", Array.isArray(result.data));
+
+      if (Array.isArray(result.data)) {
+  setProjectList(result.data.slice(0, 6));
+} else {
+  console.log("Not Array:", result.data);
+  setProjectList([]);
+}
+    } catch (error) {
+      console.log("API ERROR", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -38,8 +46,8 @@ function ProjectList() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {!loading &&
-          (projectList) &&
-          projectList.map((project, index) => (
+          Array.isArray(projectList) &&
+projectList.map((project, index) => (
             <ProjectCard key={project.projectId} project={project} />
           ))}{" "}
         {loading &&
