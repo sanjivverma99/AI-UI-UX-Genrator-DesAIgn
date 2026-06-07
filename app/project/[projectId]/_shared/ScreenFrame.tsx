@@ -1,177 +1,176 @@
+"use client";
+
 import { Rnd } from "react-rnd";
 import { GripVertical } from "lucide-react";
-import { THEMES, themeToCssVars } from "@/data/Themes";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { THEMES } from "@/data/Themes";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { SettingContext } from "@/context/SettingContext";
 import { ProjectType, ScreenConfig } from "@/type/types";
 import ScreenHandler from "./ScreenHandler";
 import { HtmlWrapper } from "@/data/constant";
 
-type props = {
+type Props = {
   x: number;
   y: number;
   setPanningEnabled: (enabled: boolean) => void;
   width: number;
   height: number;
-  htmlCode?: string | undefined;
+  htmlCode?: string;
   projectDetail?: ProjectType | null;
-  screen: ScreenConfig[];
-}
+  screen: ScreenConfig;
+  iframeRef: any;
+};
 
 function ScreenFrame({
-  x, y, setPanningEnabled, width, height, htmlCode, projectDetail, screen}: props) {
+  x,
+  y,
+  setPanningEnabled,
+  width,
+  height,
+  htmlCode,
+  projectDetail,
+  screen,
+  iframeRef,
+}: Props) {
+  const { settingsDetail } = useContext(SettingContext);
+  const localIframeRef = useRef<HTMLIFrameElement | null>(null);
 
-  const {settingsDetail, setSettingDetail} = useContext(SettingContext);
+  const [size, setSize] = useState({
+    width,
+    height,
+  });
 
-  const selectedThemeKey = (settingsDetail?.theme ??
-    projectDetail?.theme) as keyof typeof THEMES;
+  const html = useMemo(() => {
+    return HtmlWrapper(
+      THEMES,
+      htmlCode || "",
+      settingsDetail?.theme || projectDetail?.theme,
+    );
+  }, [htmlCode, settingsDetail?.theme, projectDetail?.theme]);
 
-  //@ts-ignore
-  const themeKey = [settingsDetail?.thme ?? projectDetail?.theme]
-  const iframeRef = useRef<HTMLIFrameElement|null>(null);
-
-  // keep manual resize + auto in same state
-  const [size, setSize] = useState({width,height});
-
-  const resizingLockedRef = useRef(false);
-  const lastThemeRef = useRef<string | undefined>(undefined);
-// build html with theme css vars
-
-  const html = HtmlWrapper(THEMES,htmlCode as string)
-
-  useEffect(()=>{
-    setSize((s) =>({
-     width: width ?? s.width,
-     height:height ?? s.height,
-    }));
-  },[width,height]);
-  
-
+  useEffect(() => {
+    setSize({
+      width,
+      height,
+    });
+  }, [width, height]);
 
   const measureIframeHeight = useCallback(() => {
-    const iframe = iframeRef.current;
+    const iframe = localIframeRef.current;
+
     if (!iframe) return;
 
     try {
       const doc = iframe.contentDocument;
+
       if (!doc) return;
 
-      const headerH = 40;
-      const htmlEl = doc.documentElement;
       const body = doc.body;
 
-      const contentH = Math.max(
-        htmlEl?.scrollHeight ?? 0,
-        body?.scrollHeight ?? 0,
-        htmlEl?.offsetHeight ?? 0,
-        body?.offsetHeight ?? 0
-      );
+      const h = Math.max(body.scrollHeight, doc.documentElement.scrollHeight);
 
-      const next = Math.min(Math.max(contentH + headerH, 160), 2000);
-
-      setSize((s) => (Math.abs(s.height - next) > 2 ? { ...s, height: next } : s));
-    } catch {
-      // if sandbox/origin blocks access, we can't measure
+      setSize((prev) => ({
+        ...prev,
+        height: Math.max(h + 40, 300),
+      }));
+    } catch (err) {
+      console.log(err);
     }
   }, []);
 
   useEffect(() => {
-    const iframe = iframeRef.current;
+    const iframe = localIframeRef.current;
+
     if (!iframe) return;
 
     const onLoad = () => {
       measureIframeHeight();
-
-      const doc = iframe.contentDocument;
-      if (!doc) return;
-
-      const observer = new MutationObserver(() => measureIframeHeight());
-      observer.observe(doc.documentElement, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        characterData: true,
-      });
-
-      const t1 = window.setTimeout(measureIframeHeight, 50);
-      const t2 = window.setTimeout(measureIframeHeight, 200);
-      const t3 = window.setTimeout(measureIframeHeight, 600);
-
-      return () => {
-        observer.disconnect();
-        window.clearTimeout(t1);
-        window.clearTimeout(t2);
-        window.clearTimeout(t3);
-      };
     };
 
     iframe.addEventListener("load", onLoad);
-    window.addEventListener("resize", measureIframeHeight);
 
     return () => {
       iframe.removeEventListener("load", onLoad);
-      window.removeEventListener("resize", measureIframeHeight);
     };
-  }, [measureIframeHeight, htmlCode]);
+  }, [measureIframeHeight, html]);
 
   return (
     <Rnd
-      default={{ x, y, width, height }}
       size={size}
-      dragHandleClassName='drag-handle'
-      enableResizing={{ bottomRight: true, bottomLeft: true }}
-      onDragStart={()=>setPanningEnabled(false)}
-      onDragStop={()=>setPanningEnabled(true)}
-      onResizeStart={()=>setPanningEnabled(false)}
-      onResizeStop={(_,__,ref,___,position)=>{setPanningEnabled(true)
+      position={{
+        x,
+        y,
+      }}
+      enableResizing={{
+        bottomRight: true,
+      }}
+      dragHandleClassName="drag-handle"
+      onDragStart={() => setPanningEnabled(false)}
+      onDragStop={() => setPanningEnabled(true)}
+      onResizeStart={() => setPanningEnabled(false)}
+      onResizeStop={(_, __, ref) => {
+        setPanningEnabled(true);
+
         setSize({
-          width:ref.offsetWidth,
-          height:ref.offsetHeight
-        })
+          width: ref.offsetWidth,
+          height: ref.offsetHeight,
+        });
       }}
       style={{
-        border: '1.5px solid #d1d5db',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        background: 'white',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-        display: 'flex',
-        flexDirection: 'column'
+        border: "1px solid #ddd",
+        borderRadius: "12px",
+        overflow: "hidden",
+        background: "white",
+        boxShadow: "0 5px 15px rgba(0,0,0,.1)",
       }}
     >
-      {/* Drag Handle */}
       <div
         className="drag-handle"
         style={{
-          padding: '5px 12px',
-          borderBottom: '1px solid #e5e7eb',
-          cursor: 'move',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '12px',
-          color: '#6b7280',
-          background: 'white',
-          userSelect: 'none',
-          flexShrink: 0,
-          height: '30px'
+          height: "40px",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 10px",
+          borderBottom: "1px solid #eee",
+          background: "white",
         }}
       >
-        <ScreenHandler screen={screen[0]} THEMES={THEMES} iframeRef={iframeRef}/>
+        <GripVertical size={15} color="#999" />
+
+        <ScreenHandler
+          screen={screen}
+          THEMES={THEMES}
+          iframeRef={localIframeRef}
+          projectId={projectDetail?.projectId}
+        />
       </div>
 
-      {/* iframe */}
       <iframe
-        style={{
-          width: '100%',
-          flex: 1,
-          border: 'none',
-          background: 'white',
-          display: 'block'
+        key={`${screen?.screenID}-${settingsDetail?.theme}`} // Force remount on theme change
+        title={screen?.screenName}
+        ref={(el) => {
+          localIframeRef.current = el;
+
+          if (typeof iframeRef === "function") {
+            iframeRef(el);
+          }
         }}
-        ref={iframeRef}
-        sandbox='allow-same-origin allow-scripts'
+        sandbox="allow-scripts allow-same-origin"
         srcDoc={html}
+        style={{
+          width: "100%",
+          height: "100%",
+          border: "none",
+          background: "transparent",
+        }}
       />
     </Rnd>
   );

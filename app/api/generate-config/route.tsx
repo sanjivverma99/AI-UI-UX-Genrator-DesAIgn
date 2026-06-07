@@ -1,6 +1,6 @@
 import { db } from "@/config/db";
 import { ProjectTable, ScreenConfigTable } from "@/config/schema";
-import { APP_LAYOUT_CONFIG_PROMPT } from "@/data/Prompt";
+import { APP_LAYOUT_CONFIG_PROMPT, GENRATE_NEW_SCREEN_IN_EXISITING_PROJECT_PROJECT } from "@/data/Prompt";
 import { currentUser } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    const { deviceType, userInput, projectId } = body;
+    const { deviceType, userInput, projectId ,oldScreenDescription,theme} = body;
 
     // Validation
     if (!deviceType || !userInput || !projectId) {
@@ -62,23 +62,35 @@ ${userInput}
             {
               role: "system",
 
-              content:
-                APP_LAYOUT_CONFIG_PROMPT.replace(
+              content: [
+                { type: "text", 
+                  text: oldScreenDescription?
+                  GENRATE_NEW_SCREEN_IN_EXISITING_PROJECT_PROJECT.replace( "{device}",deviceType).replace('{theme}',theme) :
+                   APP_LAYOUT_CONFIG_PROMPT.replace(
                   "{device}",
                   deviceType
                 ) +
                 `
+      
+                
 IMPORTANT:
 - Return ONLY valid JSON
 - Generate EXACTLY 4 screens
 - No more than 4
 - No duplicate screen names
 `,
-            },
+              }
+]            
+},
 
             {
-              role: "user",
-              content: prompt,
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": oldScreenDescription?userInput+"old Screen Description is:"+oldScreenDescription: userInput
+                }
+              ]
             },
           ],
         }),
@@ -166,7 +178,7 @@ IMPORTANT:
     // Update Project Table
     if (JSONRes) {
 
-      await db
+     !oldScreenDescription && await db
         .update(ProjectTable)
         .set({
 

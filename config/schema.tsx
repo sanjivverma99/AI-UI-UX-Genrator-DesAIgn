@@ -9,19 +9,20 @@ export const usersTable = pgTable("users", {
 
 
 export const ProjectTable = pgTable("project", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  userInput: varchar({ length: 1000 }).notNull(),
-  projectName: varchar({ length: 255 }),
-  theme: json("theme"),
-  projectId: varchar({ length: 255 }).notNull(),
-  device: varchar({ length: 100 }).notNull(),
-  createdOn: timestamp().defaultNow(),
-  config: json(),
-  projectVisualDescription: varchar({ length: 1000 }),
-  userId: varchar({ length: 255 })
-    .references(() => usersTable.email)
-    .notNull(),
-});
+ id: integer().primaryKey().generatedAlwaysAsIdentity(),
+ userInput: varchar({ length:1000 }).notNull(),
+ projectName: varchar({ length:255 }),
+ theme: varchar("theme",{length:1000}),
+ projectId: varchar({ length:255 }).notNull(),
+ device: varchar({ length:100 }).notNull(),
+ createdOn: timestamp().defaultNow(),
+ config: json(),
+ projectVisualDescription: varchar({ length:1000 }),
+ userId: varchar({ length:255 })
+   .references(()=>usersTable.email)
+   .notNull(),
+ screenshot: varchar("screenshot")
+})
 
 export const ScreenConfigTable = pgTable("screenconfig", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),

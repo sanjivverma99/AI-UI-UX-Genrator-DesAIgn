@@ -50,6 +50,14 @@ function Hero() {
       device,
       projectId,
     });
+
+    // if(result.data?.error=='Limit Exceed'){
+    //   toast.error("Upgrade to premium to create more than 2 projects"):
+    //   setLoading(false);
+    //   return;
+    // }
+    // console.log(result?.data);
+    // setLoading(false);
   } catch (error) {
     console.error(error);
   }

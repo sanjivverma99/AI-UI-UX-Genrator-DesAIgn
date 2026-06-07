@@ -1,15 +1,17 @@
 export type ProjectType = {
     id: number;
-    projectTd: string;
+    projectId: string;
     device: string;
     userInput: string;
     createdAt: string;
     projectName?: string;
     theme?: string;
+    screenshot?: string;
 
 }
 
 export type ScreenConfig = {
+    selectedTheme: string;
     id: number;
     screenID: string;
     screenName: string;

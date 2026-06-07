@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  try {
+  
     const {
       projectId,
       screenId,
@@ -41,6 +41,7 @@ Rules:
 - Premium design
 - Return ONLY HTML code
 `;
+try {
 
     // OpenRouter API call
     const response = await fetch(
@@ -158,7 +159,8 @@ CRITICAL STYLING RULES:
 
     return NextResponse.json(updateResult[0]);
 
-  } catch (error) {
+  } 
+  catch (error) {
     console.error("ERROR:", error);
 
     return NextResponse.json(

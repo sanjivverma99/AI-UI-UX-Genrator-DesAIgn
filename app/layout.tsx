@@ -11,7 +11,7 @@ const appFont = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "UIUX Mockup Generator App",
+  title: "UIUX DesAIgn Generator App",
   description: "Generate High Quality Free UIUX Mobile and Web mokup Designs",
 };
 

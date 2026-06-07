@@ -44,73 +44,52 @@ import { themeToCssVars } from "./Themes";
 
 
 
-export const HtmlWrapper = (THEMES: any, htmlCode: string) => {
+export const HtmlWrapper = (THEMES: any, htmlCode: string,selectedTheme:string) => {
     
-  return `
+
+const theme=THEMES[selectedTheme];
+
+return `
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
 
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<link
-rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-/>
-
 <style>
 
-${themeToCssVars(THEMES)}
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
+:root{
+--primary:${theme?.primary || "#6366f1"};
+--secondary:${theme?.secondary || "#ec4899"};
+--background:${theme?.background || "#ffffff"};
 }
 
 body{
+margin:0;
+padding:16px;
 background:var(--background);
-color:var(--foreground);
-font-family:Arial, sans-serif;
-min-height:100vh;
-padding:20px;
-}
-
-.card{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:24px;
-padding:20px;
-box-shadow:0 10px 30px rgba(0,0,0,0.1);
+font-family:Inter,sans-serif;
 }
 
 button{
-background:var(--primary);
-color:white;
-border:none;
-padding:12px 18px;
-border-radius:14px;
-cursor:pointer;
-font-weight:600;
+background:var(--primary)!important;
+color:white!important;
 }
 
-input{
-background:white;
-border:1px solid var(--border);
-padding:12px;
-border-radius:12px;
-width:100%;
-}
-
-.gradient-bg{
-background: linear-gradient(
+.card{
+border-radius:16px;
+padding:16px;
+background:linear-gradient(
 135deg,
 var(--primary),
-#9333ea
+var(--secondary)
 );
+color:white;
 }
 
 </style>
@@ -119,9 +98,10 @@ var(--primary),
 
 <body>
 
-${htmlCode ?? ""}
+${htmlCode}
 
 </body>
+
 </html>
 `;
 };

@@ -236,6 +236,7 @@ export const THEMES = {
 } as const;
 
 
+
 export const THEME_NAME_LIST = [
     "AURORA_INK",
     "DUSTY_ORCHID",
